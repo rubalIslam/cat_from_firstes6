@@ -15,10 +15,12 @@ import * as SecureStore from "expo-secure-store";
 import Welcome from "../screens/Welcome";
 
 import SignInScreen from "../screens/SignInScreen";
+import LoginScreen from "../screens/LoginScreen";
 import SignUpScreen from "../screens/RegisterScreen";
+import HomeScreen from "../screens/HomeScreen";
 /*
 import MainScreen from "./screens/MainScreen";
-import HomeScreen from "./screens/HomeScreen";
+
 //import MainScreen from "./screens/MainScreen";
 
 //Admin routes
@@ -97,6 +99,13 @@ export const AuthStackScreen = () => {
           animationEnabled: false,
         }}
       />*/}
+      <AuthStack.Screen
+        name="Login"
+        component={LoginScreen}
+        options={{
+          animationEnabled:false,
+        }}
+      />
       <AuthStack.Screen
         name="LoginScreen"
         component={LoginStackScreen}
@@ -391,15 +400,33 @@ export const AdminTabScreen = () => {
 //=================ROOT NAV======================================
 const Drawer = createDrawerNavigator();
 export const DrawerNavigator = () => {
-  //const user = useSelector((state) => state.auth.user);
-  //const userLogin = useSelector((state) => state.userLogin.userInfo);
-  //userLogin && console.log("userLogin", userLogin["isAdmin"]);
+  const user = useSelector((state) => state.auth.user);
+  console.log("use:",user);
+  //console.log("d",user["token"])
+  const userData = useSelector((state) => state.userLogin);
+  const stateData = useSelector((state) => state)
 
+  console.log("stateData",stateData)
+
+  let userLogin = {}
+
+  if (userData){
+    console.log("userData",userData)
+
+    userData.initialState ?
+    userLogin = userData.initialState.userInfo : 
+    userLogin = {}
+    //userLogin = JSON.parse(userData._55)
+  }
+
+  userLogin && console.log("userLogin1", userLogin["token"]);
+/*
   const userLogin = {
     "token":"ase",
     "isAdmin":false
   }
-  const user = "welcome";
+  */
+  //const user = "welcome";
   const firstTime = "no";
 
   return (
@@ -463,6 +490,59 @@ export const DrawerNavigator = () => {
         />
         )*/}
 
+      { userLogin && userLogin["token"] && userLogin["isAdmin"] == false ? (
+        <Drawer.Screen
+          key="HomeTab"
+          name="HomeTab"
+          component={TabScreen}
+          options={() => ({
+            title: ({ focused }) => (
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: "500",
+                  //fontFamily: "Roboto-Medium",
+                }}
+              >
+                Home
+              </Text>
+            ),
+            drawerIcon: ({ focused }) => (
+              <MaterialCommunityIcons
+                name="home-outline"
+                size={23}
+                //color={focused ? Colors.lighter_green : Colors.grey}
+              />
+            ),
+          })}
+        />
+      ) : (
+        <Drawer.Screen
+          name="AuthStack1"
+          component={AuthStackScreen}
+          options={() => ({
+            title: ({ focused }) => (
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: "500",
+                  //fontFamily: "Roboto-Medium",
+                }}
+              >
+                Login
+              </Text>
+            ),
+            drawerIcon: ({ focused }) => (
+              <MaterialCommunityIcons
+                name="login"
+                size={23}
+                //color={focused ? Colors.lighter_green : Colors.grey}
+              />
+            ),
+          })}
+        />
+      )}
+
       {userLogin && userLogin["token"] && userLogin["isAdmin"] == true ? (
         <Drawer.Screen
           key="AdminTab"
@@ -515,58 +595,7 @@ export const DrawerNavigator = () => {
           })}
         />
       )}
-      {userLogin && userLogin["token"] && userLogin["isAdmin"] == false ? (
-        <Drawer.Screen
-          key="HomeTab"
-          name="HomeTab"
-          component={TabScreen}
-          options={() => ({
-            title: ({ focused }) => (
-              <Text
-                style={{
-                  fontSize: 14,
-                  fontWeight: "500",
-                  //fontFamily: "Roboto-Medium",
-                }}
-              >
-                Home
-              </Text>
-            ),
-            drawerIcon: ({ focused }) => (
-              <MaterialCommunityIcons
-                name="home-outline"
-                size={23}
-                //color={focused ? Colors.lighter_green : Colors.grey}
-              />
-            ),
-          })}
-        />
-      ) : (
-        <Drawer.Screen
-          name="AuthStack1"
-          component={AuthStackScreen}
-          options={() => ({
-            title: ({ focused }) => (
-              <Text
-                style={{
-                  fontSize: 14,
-                  fontWeight: "500",
-                  //fontFamily: "Roboto-Medium",
-                }}
-              >
-                Login
-              </Text>
-            ),
-            drawerIcon: ({ focused }) => (
-              <MaterialCommunityIcons
-                name="login"
-                size={23}
-                //color={focused ? Colors.lighter_green : Colors.grey}
-              />
-            ),
-          })}
-        />
-      )}
+      
       {/*user == "" ? (
         <Drawer.Screen
           name="AuthStack"

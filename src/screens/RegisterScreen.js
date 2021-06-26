@@ -1,116 +1,287 @@
-import React, { useEffect, useState } from "react";
-import { useNavigation } from "@react-navigation/native";
+import React, { useState, useRef, useEffect } from "react";
+import { Field, reduxForm } from "redux-form";
 import {
-  Text,
-  TextInput,
   View,
-  TouchableOpacity,
   StyleSheet,
+  Text,
+  ImageBackground,
+  Dimensions,
+  Alert,
+  Image,
   Platform,
-  SafeAreaView
+  ScrollView,
+  KeyboardAvoidingView,
+  SafeAreaView,
+  ActivityIndicator,
+  TouchableWithoutFeedback,
+  Keyboard,
+  TouchableOpacity,
+  TextInput,
 } from "react-native";
-/*import axios from "axios";
-import { ScrollView } from "react-native-gesture-handler";
+
+import Colors from "../utils/Colors";
+import CustomText from "../components/UI/CustomText";
+import { Ionicons } from "@expo/vector-icons";
+import { useDispatch, useSelector } from "react-redux";
+import { Login as LoginAction } from "../reducers/auth/authActions";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { useDispatch, useSelector } from 'react-redux';
-import { register } from "../actions/userActions";
-*/
-export default function SingUpScreen({ setToken, setId }) {
- /* const navigation = useNavigation();
+
+import PropTypes from "prop-types";
+
+import * as LocalAuthentication from "expo-local-authentication";
+import * as SecureStore from "expo-secure-store";
+import { secretKey } from "../utils/Config";
+import { SignUp } from "../reducers/auth/authActions";
+//import { TextInput } from "react-native-gesture-handler";
+//import {TextInput} from "react-native-paper";
+//import CustomText from "../components/UI/CustomText";
+//import { onChange } from "react-native-reanimated";
+//Components
+//import { LoginForm } from "./components";
+
+const { height, width } = Dimensions.get("window");
+export default function SignUpScreen(props) {
+  const dispatch = useDispatch();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [message, setMessage] = useState(null);
-  const [errorSignup,setErrorSignUp] = useState("");
+  const [error, setError] = useState("");
 
-  const dispatch = useDispatch()  
-  const userRegister = useSelector((state) => state.userRegister)
-  const { loading, error, userInfo } = userRegister
+  //const { handleSubmit } = props;
+  //const [showPass, setShowPass] = useState(false);
+  //const auth = useSelector((state) => state.auth);
+  //const unmounted = useRef(false);
 
-  useEffect(() => {
-      if(userInfo) {
-          console.log("push to main screen")
-          //navigation.navigate("MainScreen")
-      }
-  }),[userInfo, navigation]
-
-  const handleSubmit = async () => {
-      //e.preventDefault()
-    if(password !== confirmPassword){
-        //alert("Password and Confirm Password is not same!")
-        setMessage("Password and Confirm Password is not same!")
-    }else{
-        console.log("passwordcorrect")
-        try{
-          dispatch(register(name, email, password))
-          navigation.navigate('LoginScreen')
-        }catch(err){
-          setErrorSignUp(err)
+  const submit = async (e) => {
+    if (password.trim() !== "" || confirmPassword.trim() !== "" || email.trim() !== "" || name.trim() !== ""){
+      if (password === confirmPassword){
+        try {
+          await dispatch(SignUp(name,email,password))
+          props.navigation.navigate("Login");
+        }catch(ERR){
+          alert("al",ERR)
         }
+      }else{
+        setError("Password and ConfirmPassword are not Equal")
+      }
+    }else{
+      setError("Any field cannot be empty")
     }
   }
 
   return (
-    <ScrollView bounces={false} contentContainerStyle={styles.container}>
-      <KeyboardAwareScrollView extraScrollHeight={110}>
-        <SafeAreaView>
-          <View style={styles.inner}>
-            <Text style={styles.title}>If you dont have account, Please Register Here</Text>
-            <TextInput
-              autoCapitalize="none"
-              style={styles.textInput}
-              placeholder="Email"
-              placeholderTextColor="#E1E1E1"
-              onChangeText={text => setEmail(text)}
-            />
-            <TextInput
-              style={styles.textInput}
-              placeholder="Name"
-              placeholderTextColor="#E1E1E1"
-              onChangeText={text => setName(text)}
-            />
-            <TextInput
-              autoCapitalize="none"
-              style={styles.textInput}
-              placeholder="Password"
-              placeholderTextColor="#E1E1E1"
-              secureTextEntry={true}
-              onChangeText={text => setPassword(text)}
-            />
-            <TextInput
-              autoCapitalize="none"
-              style={styles.textInput}
-              placeholder="Confirm password"
-              placeholderTextColor="#E1E1E1"
-              secureTextEntry={true}
-              onChangeText={text => setConfirmPassword(text)}
-            />
-            {message && <Text style={{color:"red", paddingTop:20}}>): {message}</Text>}
-            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-              <Text style={styles.buttonText}> Register</Text>
-            </TouchableOpacity>
+    <KeyboardAwareScrollView
+      extraScrollHeight={110}
+      contentContainerStyle={styles.container}
+    >
+      <ImageBackground
+        style={{ flex: 1, position: "absolute", height, width }}
+        source={require("../../src/assets/Images/flower3.jpg")}
+        blurRadius={10}
+      ></ImageBackground>
+
+      <SafeAreaView style={{ alignItems: "center" }}>
+        <TouchableOpacity
+          onPress={() => {
+            props.navigation.goBack();
+          }}
+          style={{ position: "absolute", top: 20, left: 20 }}
+        >
+          <Ionicons
+            name="ios-arrow-back"
+            size={35}
+            color={Colors.light_green}
+          />
+        </TouchableOpacity>
+        <View style={styles.header}>
+          <View>
+            <CustomText style={styles.title}>REGISTER</CustomText>
+          </View>
+        </View>
+        <View style={styles.form}>
+          <TextInput
+            autoCapitalize="none"
+            style={styles.textInput}
+            placeholder="Name"
+            placeholderTextColor="grey"
+            onChangeText={text => setName(text)}
+            value={name}
+          />
+          <TextInput
+            autoCapitalize="none"
+            style={styles.textInput}
+            placeholder="Email"
+            placeholderTextColor="grey"
+            onChangeText={text => setEmail(text)}
+            value={email}
+          />
+
+          <TextInput
+            style={styles.textInput}
+            placeholder="Password"
+            placeholderTextColor="grey"
+            secureTextEntry={true}
+            autoCapitalize="none"
+            onChangeText={text => setPassword(text)}
+            value={password}
+          />
+          <TextInput
+            style={styles.textInput}
+            placeholder="Confirm Password"
+            placeholderTextColor="grey"
+            secureTextEntry={true}
+            autoCapitalize="none"
+            onChangeText={text => setConfirmPassword(text)}
+            value={confirmPassword}
+          />
+          <TouchableOpacity style={styles.button} onPress={submit}>
+              <Text style={styles.buttonText}>Register</Text>
+          </TouchableOpacity>
+          {
+            error?
+          <Text
+            style={{
+              color:"red",
+              textAlign:"center"
+            }}
+          >
+            {error}
+          </Text>
+          :null
+          }
+          <View style={styles.group}>
             <TouchableOpacity
               onPress={() => {
-                navigation.navigate("LoginScreen");
+                props.navigation.navigate("ForgetPwScreen");
               }}
             >
-              <Text style={styles.underButton}>
-                Already have an account, SignIn
-              </Text>
+              <CustomText
+                style={{
+                  ...styles.textSignSmall,
+                  //fontFamily: "Roboto-Medium",
+                }}
+              >
+                Forget Password ?
+              </CustomText>
             </TouchableOpacity>
           </View>
+          <TouchableOpacity
+              onPress={() => {
+                props.navigation.navigate("Login");
+              }}
+            >
+              <CustomText
+                style={{
+                  ...styles.textSignLink,
+                  //fontFamily: "Roboto-Medium",
+                }}
+              >
+                 Already have an account, Login
+              </CustomText>
+            </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    </KeyboardAwareScrollView>
+  );
+  /*
+  return (
+    <View
+    //style={styles.container}
+    >
+      <ImageBackground
+        style={{ flex: 1, position: "absolute", height, width }}
+        source={require("../../src/assets/Images/flower3.jpg")}
+        blurRadius={10}
+      ></ImageBackground>
+      
+      
+
+      <KeyboardAwareScrollView
+        //behavior={Platform.OS == "ios" ? "position" : "height"}
+        extraScrollHeight={110}
+        //style={styles.container}
+      >
+        <SafeAreaView style={{ alignItems: "center" }}>
+          <TouchableOpacity
+            onPress={() => {
+              props.navigation.goBack();
+            }}
+            style={{ position: "absolute", top: 50, left: 20 }}
+          >
+            <Ionicons
+              name="ios-arrow-back"
+              size={35}
+              color={Colors.light_green}
+            />
+            <View style={styles.header}>
+              <View>
+                <CustomText style={styles.title}>LOGIN</CustomText>
+              </View>
+            </View>
+            
+          <ScrollView
+            //style={styles.container}
+          >
+          
+            <TouchableWithoutFeedback 
+                onPress={Keyboard.dismiss}
+          >
+            <View
+              style={{
+                flexDirection: "column",
+                marginHorizontal: 10,
+                zIndex: -1,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <TextInput
+                autoCapitalize="none"
+                style={styles.textInput}
+                placeholder="Email"
+                placeholderTextColor="grey"
+                onChangeText={(text) => setEmail(text)}
+                value={email}
+              />
+
+              <TextInput
+                style={styles.textInput}
+                placeholder="password"
+                placeholderTextColor="grey"
+                secureTextEntry={true}
+                autoCapitalize="none"
+                onChangeText={(text) => setPassword(text)}
+                value={password}
+              />
+
+              <View style={styles.group}>
+                <TouchableOpacity
+                  onPress={() => {
+                    props.navigation.navigate("ForgetPwScreen");
+                  }}
+                >
+                  <CustomText
+                    style={{
+                      ...styles.textSignSmall,
+                      //fontFamily: "Roboto-Medium",
+                    }}
+                  >
+                    Forget Password ?
+                  </CustomText>
+                </TouchableOpacity>
+              </View>
+            </View>
+            </TouchableWithoutFeedback>
+          </ScrollView>
+          
+          </TouchableOpacity>
         </SafeAreaView>
       </KeyboardAwareScrollView>
-    </ScrollView>
+    </View>
   );
   */
-  return (
-    <Text>
-      Signup
-    </Text>
-  )
 }
 
 const styles = StyleSheet.create({
@@ -118,55 +289,93 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "black",
     alignItems: "center",
-    justifyContent: "center"
-  },
-  inner: {
-    padding: 24,
-    flex: 1,
-    alignItems: "center"
-  },
-  title: {
-    textAlign:"center",
-    fontSize: 24,
-    color: "white",
-    marginVertical: 20
+    justifyContent: "center",
   },
   button: {
-    width: 190,
-    height: 65,
-    borderRadius: 50,
-    backgroundColor: "tomato",
+    width: 330,
+    height: 50,
+    borderRadius: 5,
+    backgroundColor: "teal",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 50
+    marginTop: 10
+
   },
   buttonText: {
     color: "white",
     fontSize: 24
   },
-  underButton: {
-    marginTop: 15,
-    color: "white",
-    textDecorationLine: "underline"
+  group: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginVertical: 10,
   },
   textInput: {
-    borderBottomColor: "white",
+    borderBottomColor: "green",
     borderBottomWidth: 1,
     width: 330,
     height: 45,
     marginBottom: 30,
-    paddingLeft: 15,
-    color: "white"
+    color: "teal",
   },
-  textArea: {
-    width: 330,
-    height: 80,
-    borderColor: "white",
-    borderWidth: 1,
-    paddingHorizontal: 15,
-    paddingTop: 15,
-    textAlignVertical: "top",
-    color: "white",
-    marginBottom: 20
-  }
+  header: {
+    marginTop: height * 0.01,
+    marginBottom: 10,
+    marginHorizontal: 20,
+  },
+  title: {
+    color: "green",
+    fontWeight: "bold",
+    fontSize: 40,
+    letterSpacing: 5,
+    //fontFamily: "Roboto-Bold",
+    textAlign: "center",
+  },
+  text: {
+    color: "#fff",
+  },
+  signIn: {
+    width: "100%",
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 5,
+    flexDirection: "row",
+    backgroundColor: Colors.lighter_green,
+  },
+  textSign: {
+    fontSize: 15,
+    color: "#fff",
+    //fontFamily: "Roboto-Medium",
+  },
+  textSignSmall: {
+    color: "#3667a8",
+    textAlign: "center",
+  },
+  textSignLink: {
+    color: "#3667a8",
+    textAlign: "center",
+  },
+  center: {
+    alignItems: "center",
+  },
+  circleImage: {
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    padding: 20,
+    borderRadius: 55,
+    borderStyle: "dashed",
+    borderColor: Colors.grey,
+  },
+  faceid: {
+    resizeMode: "contain",
+    height: 70,
+    width: 70,
+  },
+  loginOpt: {
+    color: Colors.lighter_green,
+    //fontFamily: "Roboto-Medium",
+    marginBottom: 10,
+  },
 });

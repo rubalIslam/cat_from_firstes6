@@ -15,7 +15,7 @@ export const RESET_PASSWORD = 'RESET_PASSWORD';
 export const RESET_ERROR = 'RESET_ERROR';
 
 //import AskingExpoToken from '../../components/Notification/AskingNotiPermission';
-import AskingExpoToken from '../../components/Notification/AskingNotiPermission';
+//import AskingExpoToken from '../../components/Notification/AskingNotiPermission';
 
 //Create dataStorage
 const saveDataToStorage = (name, data) => {
@@ -32,6 +32,7 @@ export const SignUp = (name, email, password) => {
     dispatch({
       type: AUTH_LOADING,
     });
+    console.log("f called");
     try {
       const response = await timeoutPromise(
         fetch(`${API_URL}/user/register`, {
@@ -69,7 +70,9 @@ export const Login = (email, password) => {
     dispatch({
       type: AUTH_LOADING,
     });
-    const pushToken = await AskingExpoToken();
+    //const pushToken = await AskingExpoToken();
+    const pushToken = "abc"
+    console.log(email,":",password,":",pushToken,":")
     try {
       const response = await timeoutPromise(
         fetch(`${API_URL}/user/login`, {
@@ -100,6 +103,7 @@ export const Login = (email, password) => {
         user: resData,
       });
     } catch (err) {
+      console.log("e",err)
       throw err;
     }
   };
